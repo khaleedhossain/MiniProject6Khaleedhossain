@@ -16,6 +16,12 @@ def index(request):
     return render(request, "recipes/index.html", {"recipes": recipes})
 
 
+@login_required
+def mine(request):
+    recipes = Recipe.objects.filter(author=request.user)
+    return render(request, "recipes/my_recipes.html", {"recipes": recipes})
+
+
 def detail(request, pk):
     recipe = get_object_or_404(Recipe.objects.select_related("author"), pk=pk)
     return render(request, "recipes/detail.html", {"recipe": recipe})

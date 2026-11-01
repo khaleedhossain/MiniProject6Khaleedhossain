@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}My Recipes{% endblock %}
+{% block header %}My Recipes{% endblock %}
+{% block header_action %}
+  <a class="btn btn-primary" href="{% url 'recipes:create' %}">New Recipe</a>
+{% endblock %}
+
+{% block content %}
+{% if not recipes %}
+  <p class="text-muted">You haven't added any recipes yet. <a href="{% url 'recipes:create' %}">Add one.</a></p>
+{% endif %}
+<div class="row row-cols-1 row-cols-md-3 g-3">
+  {% for recipe in recipes %}
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ recipe.title }}</h5>
+          <p class="card-subtitle text-muted mb-2">{{ recipe.ingredients.count }} ingredient{{ recipe.ingredients.count|pluralize }}</p>
+          <a href="{% url 'recipes:detail' recipe.pk %}" class="btn btn-outline-primary btn-sm">View</a>
+          <a href="{% url 'recipes:update' recipe.pk %}" class="btn btn-outline-secondary btn-sm">Edit</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

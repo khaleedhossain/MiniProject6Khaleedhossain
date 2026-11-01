@@ -10,6 +10,7 @@ app_name = "recipes"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("mine/", views.mine, name="mine"),
     path("<int:pk>/", views.detail, name="detail"),
     path("create/", views.create, name="create"),
     path("<int:pk>/update/", views.update, name="update"),

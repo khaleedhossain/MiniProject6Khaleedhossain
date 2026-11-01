@@ -1,3 +1,7 @@
+# INF601 - Advanced Programming in Python
+# Khaleed Hossain
+# Mini Project 6
+
 """
 URL configuration for mysite project.
 

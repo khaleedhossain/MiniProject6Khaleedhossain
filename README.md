@@ -30,6 +30,7 @@ MiniProject6Khaleedhossain/
             ├── base.html                 # Bootstrap 5 navbar/layout
             ├── recipes/
             │   ├── index.html            # card grid of all recipes
+            │   ├── my_recipes.html       # current user's own recipes
             │   ├── detail.html           # ingredients + instructions + delete modal
             │   └── recipe_form.html      # shared create/update form
             └── registration/
@@ -95,6 +96,7 @@ so the server survives closing the browser tab.
 | Route | Page | Notes |
 |---|---|---|
 | `/` | Recipe list | Public. Card grid of every recipe. |
+| `/mine/` | My Recipes | Login required. Just the current user's own recipes, with quick Edit links. |
 | `/<id>/` | Recipe detail | Public. Ingredients + instructions; delete button (owner only) opens a **Bootstrap modal** to confirm before the destructive POST. |
 | `/create/` | New recipe | Login required. `GET` renders the form, `POST` validates and saves it. |
 | `/<id>/update/` | Edit recipe | Login + ownership required (403 otherwise). Same form, pre-filled. |
@@ -105,6 +107,20 @@ so the server survives closing the browser tab.
 
 Bootstrap 5 (via CDN) styles the navbar, forms, cards, alerts, and the
 delete-confirmation modal.
+
+## Requirements coverage
+
+- Header comments (name/class/project) on every custom `.py` file.
+- One app (`recipes`) inside the `mysite` project, standard Django layout.
+- 6 templated pages (index, my-recipes, detail, create/update form, login,
+  register), all extending a shared `base.html`.
+- Forms: `/create/`, `/<id>/update/`, `/accounts/register/`,
+  `/accounts/login/`.
+- Django admin: inline `Ingredient` editor on `Recipe`, `list_display`,
+  `list_filter`, `search_fields`, `date_hierarchy`, and a computed column.
+- Bootstrap 5, including a modal (delete confirmation).
+- Register/login system via `django.contrib.auth`.
+- 6 commits on `main`, `requirements.txt` included.
 
 ## Verified end-to-end
 
