@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ recipe.title }}{% endblock %}
+{% block header %}{{ recipe.title }}{% endblock %}
+{% block header_action %}
+  {% if user.is_authenticated and user.id == recipe.author_id %}
+    <a class="btn btn-outline-secondary" href="{% url 'recipes:update' recipe.pk %}">Edit</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<p class="text-muted">by {{ recipe.author.username }} on {{ recipe.created|date:"Y-m-d" }}</p>
+
+<h2 class="h5 mt-4">Ingredients</h2>
+<ul class="list-group mb-4" style="max-width: 28rem;">
+  {% for ingredient in recipe.ingredients.all %}
+    <li class="list-group-item">{{ ingredient.description }}</li>
+  {% endfor %}
+</ul>
+
+<h2 class="h5">Instructions</h2>
+<p style="white-space: pre-line;">{{ recipe.instructions }}</p>
+
+{% if user.is_authenticated and user.id == recipe.author_id %}
+  <button type="button" class="btn btn-outline-danger mt-3" data-bs-toggle="modal" data-bs-target="#deleteModal">
+    Delete recipe
+  </button>
+
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Delete "{{ recipe.title }}"?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          This removes the recipe and all of its ingredients. This can't be undone.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form action="{% url 'recipes:delete' recipe.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

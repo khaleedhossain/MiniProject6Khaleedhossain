@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In{% endblock %}
+{% block header %}Log In{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-5">
+    {% if form.errors %}
+      <div class="alert alert-warning">Incorrect username or password.</div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+          {{ field }}
+        </div>
+      {% endfor %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn btn-primary">Log In</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
