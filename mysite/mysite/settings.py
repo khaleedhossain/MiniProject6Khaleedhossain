@@ -25,10 +25,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-927hn#f*a^il&7^i!8)b-9u3t#rpov=bjzy02c*)*br2(kssp9'
+# Never hardcode a real key here -- even a freshly generated one becomes
+# worthless the moment this file is committed to a public repo. Set
+# DJANGO_SECRET_KEY in the environment on any real deployment (dev box
+# included); this fallback is an obvious placeholder for local runs only.
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-local-dev-only-placeholder-do-not-deploy-with-this",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Defaults to False (secure by default). Set DJANGO_DEBUG=True in the
+# environment only for local development, never on the dev box.
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 # On the dev box, set DJANGO_ALLOWED_HOST to the site hostname from the
 # course feedback (no scheme) before running the server, e.g.:
@@ -58,6 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'recipes.middleware.AdminIPAllowlistMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

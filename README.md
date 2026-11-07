@@ -25,6 +25,7 @@ MiniProject6Khaleedhossain/
         ├── admin.py           # styled admin: inline ingredients, list_display, search, filters
         ├── forms.py           # RecipeForm, RegisterForm, LoginForm (Bootstrap classes on widgets)
         ├── views.py           # index, detail, create, update, delete, register
+        ├── middleware.py      # AdminIPAllowlistMiddleware (Week 12 security fix)
         ├── urls.py
         └── templates/
             ├── base.html                 # Bootstrap 5 navbar/layout
@@ -79,10 +80,13 @@ Open <http://127.0.0.1:8000>.
 
 **On the course dev box** (per the Mini Project 6 instructions — bind to
 all interfaces so the lab's reverse proxy can reach it, and set your dev
-box's site hostname so Django accepts the request and trusts it for CSRF):
+box's site hostname so Django accepts the request and trusts it for CSRF).
+As of the Week 12 security fixes below, also set `DJANGO_SECRET_KEY` (every
+deployment needs its own, never committed):
 
 ```bash
 export DJANGO_ALLOWED_HOST=YOUR_SITE_HOSTNAME   # no https://, from the private Dev Box Access feedback
+export DJANGO_SECRET_KEY=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
 python manage.py runserver 0.0.0.0:8000
 ```
 
@@ -90,6 +94,53 @@ python manage.py runserver 0.0.0.0:8000
 `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` (with `https://` prepended for
 the latter) — see the top of `mysite/settings.py`. Run this inside `tmux`
 so the server survives closing the browser tab.
+
+## Security fixes (Week 12)
+
+Three findings were filed against this site during the Week 12 pentest
+exercise and fixed. Each entry is root cause → fix → where.
+
+1. **`DEBUG = True` leaked tracebacks/settings on any bad URL.**
+   Root cause: the tutorial default (`DEBUG = True`) was never turned off
+   for the dev-box deployment. Fix: `DEBUG` now reads from `DJANGO_DEBUG`
+   and **defaults to `False`** — secure by default, opt into debug mode
+   locally only. See `mysite/settings.py`.
+
+2. **`SECRET_KEY` was a literal string committed to the public repo.**
+   Root cause: same tutorial-default pattern — `startproject` generates a
+   real key directly in `settings.py`. Fix: `SECRET_KEY` now reads from
+   `DJANGO_SECRET_KEY` with an obviously-fake placeholder
+   (`django-insecure-local-dev-only-placeholder-do-not-deploy-with-this`)
+   as the local-only fallback. The old committed key must be treated as
+   permanently burned (it's in git history forever) — the dev box needs a
+   **freshly generated** key via the env var above, not a different literal
+   baked into the file. See `mysite/settings.py`.
+
+3. **`/admin/` was reachable by anyone who found it.**
+   Root cause: Django's admin is mounted at the well-known `/admin/` path
+   with no additional gate beyond its own login form. Fix: added
+   `recipes/middleware.py`'s `AdminIPAllowlistMiddleware` — when
+   `DJANGO_ADMIN_ALLOWED_IPS` (comma-separated IPs) is set, `/admin/`
+   returns `403` for any other client IP; left unset, behavior is
+   unchanged (so this doesn't break grading access by default). It reads
+   `X-Forwarded-For` since the dev box sits behind a reverse proxy. This
+   is a mitigation, not a complete fix — the real minimum bar per the
+   finding is **a strong, unique superuser password**, which has to be set
+   by hand on the dev box (see below), since I don't have that password
+   and can't rotate it remotely.
+
+### Action required on the dev box (not something code alone fixes)
+
+```bash
+# after git pull on the dev box, inside tmux:
+export DJANGO_SECRET_KEY=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
+export DJANGO_ALLOWED_HOST=YOUR_SITE_HOSTNAME
+# optional, once a specific grading/instructor IP is known:
+# export DJANGO_ADMIN_ALLOWED_IPS=1.2.3.4
+
+python manage.py changepassword admin   # rotate to a strong, unique password
+python manage.py runserver 0.0.0.0:8000
+```
 
 ## Pages / routes
 
